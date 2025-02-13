@@ -8,13 +8,17 @@ import path from 'path';
 import { LLM } from "./llm";
 import { generateScript } from "./script";
 import { readdir } from 'fs/promises';
+import * as dotenv from "dotenv"
+
+dotenv.config()
 
 const app = express();
 const server = createServer(app);
 const wss = new WebSocket.Server({ server, clientTracking: true });
 const llm = new LLM({
-    baseUrl: "http://localhost:11434/v1/",
-    model: "qwen2.5:7b",
+    baseUrl: "https://api.openai.com/v1/",
+    model: "gpt-4o",
+    apiKey: process.env.OPENAI_API_KEY
 });
 
 // Configure multer for PDF uploads

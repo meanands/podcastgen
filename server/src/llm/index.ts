@@ -43,7 +43,10 @@ export class LLM{
 
         const response = await this.client.chat.completions.create({
             model: this.model,
-            messages: this.messages
+            messages: this.messages,
+            response_format: {
+                type: "json_object"
+            }
         })
 
         return response.choices[0].message.content || '';

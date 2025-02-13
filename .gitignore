@@ -5,3 +5,4 @@ dist
 tmp_data
 *.onnx
 *.onnx.json
+server/src/generated-files/scripts

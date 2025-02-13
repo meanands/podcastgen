@@ -2,15 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AudioVisualizer } from "@/components/AudioVisualizer";
+import { Subtitles } from "@/components/Subtitles";
 
 interface AudioPlayerProps {
     scriptFile?: string;
+}
+
+interface SubtitleData {
+    type: 'subtitle';
+    index: number;
+    text: string;
+    speaker: string;
 }
 
 export function AudioPlayer({ scriptFile }: AudioPlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [currentSubtitle, setCurrentSubtitle] = useState({ text: '', speaker: '' });
     
     const wsRef = useRef<WebSocket | null>(null);
     const audioCtxRef = useRef<AudioContext | null>(null);
@@ -136,6 +145,41 @@ export function AudioPlayer({ scriptFile }: AudioPlayerProps) {
         }
     };
 
+    const handleWebSocketMessage = async (event: MessageEvent) => {
+        console.log('Received message');
+        clearPendingTimeout(); // Clear timeout when we receive data
+
+        // Check if the message is a subtitle
+        if (typeof event.data === 'string') {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('Parsed WebSocket data:', data);
+                if (data.type === 'subtitle') {
+                    const subtitleData = data as SubtitleData;
+                    console.log('Setting subtitle:', subtitleData);
+                    setCurrentSubtitle({
+                        text: subtitleData.text,
+                        speaker: subtitleData.speaker
+                    });
+                }
+            } catch (e) {
+                console.error('Error parsing subtitle data:', e);
+            }
+            return;
+        }
+
+        // Handle audio data
+        const rawPCM = new Int16Array(event.data);
+        audioQueueRef.current.push(rawPCM);
+        
+        if (!isProcessingRef.current) {
+            console.log('Starting playback chain');
+            await playNextChunk();
+        } else {
+            console.log('Already processing, queued chunk');
+        }
+    };
+
     const handlePlay = async () => {
         clearPendingTimeout(); // Clear any existing timeout when starting playback
         if (!scriptFile) {
@@ -168,19 +212,7 @@ export function AudioPlayer({ scriptFile }: AudioPlayerProps) {
                     checkForEndOfPodcast();
                 };
 
-                wsRef.current.onmessage = async (event) => {
-                    console.log('Received audio chunk');
-                    clearPendingTimeout(); // Clear timeout when we receive data
-                    const rawPCM = new Int16Array(event.data);
-                    audioQueueRef.current.push(rawPCM);
-                    
-                    if (!isProcessingRef.current) {
-                        console.log('Starting playback chain');
-                        await playNextChunk();
-                    } else {
-                        console.log('Already processing, queued chunk');
-                    }
-                };
+                wsRef.current.onmessage = handleWebSocketMessage;
 
                 wsRef.current.onclose = () => {
                     console.log('WebSocket closed');
@@ -220,6 +252,7 @@ export function AudioPlayer({ scriptFile }: AudioPlayerProps) {
         isPlayingRef.current = false;
         isProcessingRef.current = false;
         audioQueueRef.current = [];
+        setCurrentSubtitle({ text: '', speaker: '' });
     };
 
     const checkForEndOfPodcast = () => {
@@ -247,6 +280,11 @@ export function AudioPlayer({ scriptFile }: AudioPlayerProps) {
                                     isPlaying={isPlaying}
                                 />
                             </div>
+                            <Subtitles
+                                text={currentSubtitle.text}
+                                speaker={currentSubtitle.speaker}
+                                isPlaying={isPlaying}
+                            />
                             <div className="flex space-x-4">
                                 <Button
                                     onClick={isPlaying ? handleStop : handlePlay}

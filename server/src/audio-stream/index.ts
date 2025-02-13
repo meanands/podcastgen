@@ -37,6 +37,16 @@ export class AudioStream{
                 
                 if(!nextDialog) return;
     
+                // Send subtitle data before streaming audio
+                const subtitleData = {
+                    type: 'subtitle',
+                    index: this.dialogIndex - 1, // -1 because getNextDialog already incremented it
+                    text: nextDialog.conversation,
+                    speaker: nextDialog.from
+                };
+                console.log('Sending subtitle data:', subtitleData);
+                this.ws.send(JSON.stringify(subtitleData));
+    
                 this.stream(nextDialog.conversation, this.voice[nextDialog.from]);
             }
         });

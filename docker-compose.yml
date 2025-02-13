@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  server:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server/src/generated-files:/app/server/src/generated-files
+      - ./server/src/tmp_data:/app/server/src/tmp_data
+      - ./voices:/app/voices
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    command: sh -c "cd /app/server && npm run dev"
+
+  web:
+    build: .
+    ports:
+      - "3001:3001"
+    depends_on:
+      - server
+    command: sh -c "cd /app/web && npm run dev" 

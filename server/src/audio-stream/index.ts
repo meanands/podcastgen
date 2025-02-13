@@ -53,10 +53,14 @@ export class AudioStream{
     }
 
     stream(text: string, voice="lessac/en_US-lessac-high"){
-        
-        const command = "source ~/.zshrc && pyenv activate myenv && piper --model "+path.join(__dirname, "..", "resources", "voice",voice+".onnx")+" --output-raw";
+        // Use piper from virtual environment
+        const piperPath = '/opt/venv/bin/piper';
+        console.log('Executing piper from:', piperPath);
 
-        const piper = spawn("/bin/bash", ["-c", command]);
+        const piper = spawn(piperPath, [
+            '--model', `/app/voices/${voice}.onnx`,
+            '--output-raw'
+        ]);
 
         piper.stdin.write(text + "\n");
         piper.stdin.end();
@@ -67,7 +71,8 @@ export class AudioStream{
             }
         });
 
-        piper.on("close", () => {
+        piper.on("close", (code) => {
+            console.log(`Piper process exited with code ${code}`);
         });
 
         piper.stderr.on("data", (err) => {

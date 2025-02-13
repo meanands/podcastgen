@@ -103,8 +103,14 @@ export function ScriptList({ onScriptSelect, selectedScript }: ScriptListProps) 
                 />
                 <Button 
                     className="w-full"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
+                    onClick={() => {
+                        if (process.env.NEXT_PUBLIC_DISABLE_PDF_UPLOADS === 'true') {
+                            setError('PDF uploads are disabled in demo version');
+                            return;
+                        }
+                        fileInputRef.current?.click();
+                    }}
+                    disabled={uploading || process.env.NEXT_PUBLIC_DISABLE_PDF_UPLOADS === 'true'}
                 >
                     {uploading ? (
                         <>

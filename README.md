@@ -77,3 +77,15 @@ If you encounter any issues:
 2. Ensure all required voice models are in the `voices` directory
 3. Verify your OpenAI API key is correct
 4. Make sure ports 3000 and 3001 are available on your system
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+## Third-Party Licenses
+
+This project uses several third-party components, including:
+- [Piper](https://github.com/rhasspy/piper) for text-to-speech conversion
+- Piper voice models from [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices/)
+
+For detailed license information of third-party components, see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).

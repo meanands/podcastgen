@@ -67,6 +67,13 @@ app.use((req, res, next) => {
 app.post('/upload-pdf', (req, res) => {
     console.log('Received upload request');
     
+    // Check if uploads are disabled
+    if (process.env.DISABLE_PDF_UPLOADS === 'true') {
+        return res.status(403).json({ 
+            error: 'PDF uploads are disabled in demo version' 
+        });
+    }
+    
     upload.single('pdf')(req, res, async (err) => {
         if (err) {
             console.error('Multer error:', err);

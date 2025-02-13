@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { config } from "@/config";
 
 interface Script {
     filename: string;
@@ -24,7 +25,7 @@ export function ScriptList({ onScriptSelect, selectedScript }: ScriptListProps) 
     const fetchScripts = async () => {
         try {
             setLoading(true);
-            const res = await fetch('http://localhost:3000/scripts');
+            const res = await fetch(`${config.apiBaseUrl}/scripts`);
             const data = await res.json();
             if (data.success) {
                 setScripts(data.scripts);
@@ -65,7 +66,7 @@ export function ScriptList({ onScriptSelect, selectedScript }: ScriptListProps) 
             setUploading(true);
             setError(null);
 
-            const response = await fetch('http://localhost:3000/upload-pdf', {
+            const response = await fetch(`${config.apiBaseUrl}/upload-pdf`, {
                 method: 'POST',
                 body: formData,
             });
@@ -73,7 +74,12 @@ export function ScriptList({ onScriptSelect, selectedScript }: ScriptListProps) 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Upload failed');
+                if (response.status === 403) {
+                    setError('PDF uploads are disabled in demo version');
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+                return;
             }
 
             // Refresh the script list

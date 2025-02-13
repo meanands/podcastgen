@@ -22,14 +22,29 @@ An AI-powered podcast generator that converts PDF documents into natural-soundin
 
 3. Edit `.env` and add your OpenAI API key.
 
-4. Create required directories:
+4. Configure LLM:
+   In `server/src/index.ts`, configure the LLM settings according to your needs:
+   ```typescript
+   const llm = new LLM({
+       baseUrl: "https://api.openai.com/v1/",    // For OpenAI
+       // baseUrl: "https://api.deepseek.com/v1", // For Deepseek
+       model: "gpt-4",                          // Model name
+       apiKey: process.env.OPENAI_API_KEY       // API key from .env
+   });
+   ```
+   Supported LLM providers:
+   - OpenAI (api.openai.com)
+   - Deepseek (api.deepseek.com)
+   - Any compatible API with OpenAI format
+
+5. Create required directories:
    ```bash
    mkdir -p server/src/tmp_data
    mkdir -p server/src/generated-files/scripts
    mkdir -p voices
    ```
 
-5. Download Piper voice models:
+6. Download Piper voice models:
    - Download the required .onnx voice models from https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/
    - Place them in the `voices` directory
    Required models (folder structure should exactly be like this):
@@ -38,7 +53,7 @@ An AI-powered podcast generator that converts PDF documents into natural-soundin
    - voices/kusal/en_US-kusal-medium.onnx
    - voices/kusal/en_US-kusal-medium.onnx.json
 
-6. Start the application:
+7. Start the application:
    ```bash
    docker-compose up
    ```

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AudioVisualizer } from "@/components/AudioVisualizer";
 import { Subtitles } from "@/components/Subtitles";
+import { config } from "@/config";
 
 interface AudioPlayerProps {
     scriptFile?: string;
@@ -200,7 +201,7 @@ export function AudioPlayer({ scriptFile }: AudioPlayerProps) {
             
             if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
                 console.log('Creating new WebSocket connection');
-                const wsUrl = `ws://localhost:3000?scriptFile=${encodeURIComponent(scriptFile)}`;
+                const wsUrl = `${config.wsBaseUrl}?scriptFile=${encodeURIComponent(scriptFile)}`;
                 wsRef.current = new WebSocket(wsUrl);
                 wsRef.current.binaryType = "arraybuffer";
 

@@ -2,6 +2,8 @@
 
 An AI-powered podcast generator that converts PDF documents into natural-sounding conversations.
 
+[Demo](http://podcastgen-demo.anands.me:3001/)
+
 ## Prerequisites
 
 - Docker
